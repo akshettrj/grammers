@@ -275,6 +275,39 @@ impl User {
     pub fn lang_code(&self) -> Option<&str> {
         self.0.lang_code.as_deref()
     }
+
+    /// Returns true if the user status is present and is online.
+    pub fn is_online(&self) -> (bool, Option<i32>) {
+        if let Some(tl::enums::UserStatus::Online(online_status)) = &self.0.status {
+            (true, Some(online_status.expires))
+        } else {
+            (false, None)
+        }
+    }
+
+    /// Returns true along with the optional time since the user was last online, if the user status is present and is offline.
+    pub fn is_offline(&self) -> (bool, Option<i32>) {
+        if let Some(tl::enums::UserStatus::Offline(offline_status)) = &self.0.status {
+            (true, Some(offline_status.was_online))
+        } else {
+            (false, None)
+        }
+    }
+
+    /// Returns true if the user's status is "last seen recently".
+    pub fn last_seen_recently(&self) -> bool {
+        matches!(self.0.status, Some(tl::enums::UserStatus::Recently))
+    }
+
+    /// Returns true if the user's status is "last seen this week".
+    pub fn last_seen_this_week(&self) -> bool {
+        matches!(self.0.status, Some(tl::enums::UserStatus::LastWeek))
+    }
+
+    /// Returns true if the user's status is "last seen this month".
+    pub fn last_seen_this_month(&self) -> bool {
+        matches!(self.0.status, Some(tl::enums::UserStatus::LastMonth))
+    }
 }
 
 impl From<User> for PackedChat {
